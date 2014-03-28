@@ -15,6 +15,7 @@ def menu
     puts 'Press l to list out the family members.'
     puts 'Press m to add who someone is married to.'
     puts 'Press s to see who someone is married to.'
+    puts 'Press c add a child to a family.'
     puts 'Press e to exit.'
     choice = gets.chomp
 
@@ -26,7 +27,9 @@ def menu
     when 'm'
       add_marriage
     when 's'
-      show_marriage
+      see_marriage
+    when 'c'
+      add_child
     when 'e'
       exit
     end
@@ -59,14 +62,51 @@ def list
   puts "\n"
 end
 
-def show_marriage
+def see_marriage
   list
   puts "Enter the number of the relative and I'll show you who they're married to."
   person_id = gets.chomp.to_i
   first_spouse = Person.find(person_id)
 
   spouse = Parent.find_spouse(first_spouse)
-  puts "#{first_spouse.name} is married to " + spouse.name + "."
+  puts "#{first_spouse.name} is married to " + spouse.name + ".\n\n"
 end
 
+def show_all_marriages
+  Parent.all.each do |couple|
+    spouse1 = Person.find(couple.person1_id)
+    spouse2 = Person.find(couple.person2_id)
+    puts "#{couple.id} #{spouse1.name} is married to #{spouse2.name}."
+  end
+  puts "\n\n"
+end
+
+def add_child
+  show_all_marriages
+  puts "Select the parents that are having a child: "
+  parent_id = gets.chomp.to_i
+  parent = Parent.find(parent_id)
+  list
+  puts "Select the number of your child:"
+  child_id = gets.chomp.to_i
+  full_child = Person.find(child_id)
+  if full_child.parent_id
+    puts "This child has already been assigned parents.\n\n"
+  elsif parent.person1_id == child_id || parent.person2_id == child_id
+    puts "You cannot enter a parent as their own child.\n\n"
+  else
+    full_child.update({:parent_id => parent_id})
+    puts "#{full_child.name} is the child of #{full_child.parent_id}\n\n"
+  end
+end
+
+system "clear"
 menu
+
+
+
+
+
+
+
+

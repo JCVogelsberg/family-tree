@@ -1,6 +1,7 @@
 class Parent < ActiveRecord::Base
   has_many :people
 
+
   def self.find_spouse(first_spouse)
     person_spouse_id = nil
 
