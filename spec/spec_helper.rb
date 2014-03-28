@@ -10,5 +10,7 @@ I18n.enforce_available_locales = false
 
 RSpec.configure do |config|
   config.after(:each) do
+    Person.all.each { |person| person.destroy }
+    Parent.all.each { |parent| parent.destroy }
   end
 end

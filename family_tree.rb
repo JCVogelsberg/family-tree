@@ -43,10 +43,10 @@ end
 def add_marriage
   list
   puts 'What is the number of the first spouse?'
-  spouse1 = Person.find(gets.chomp)
+  spouse1 = Person.find(gets.chomp.to_i)
   puts 'What is the number of the second spouse?'
-  spouse2 = Person.find(gets.chomp)
-  spouse1.update(:spouse_id => spouse2.id)
+  spouse2 = Person.find(gets.chomp.to_i)
+  new_marriage = Parent.create(:person1_id => spouse1.id, :person2_id => spouse2.id)
   puts spouse1.name + " is now married to " + spouse2.name + "."
 end
 
@@ -62,9 +62,11 @@ end
 def show_marriage
   list
   puts "Enter the number of the relative and I'll show you who they're married to."
-  person = Person.find(gets.chomp)
-  spouse = Person.find(person.spouse_id)
-  puts person.name + " is married to " + spouse.name + "."
+  person_id = gets.chomp.to_i
+  first_spouse = Person.find(person_id)
+
+  spouse = Parent.find_spouse(first_spouse)
+  puts "#{first_spouse.name} is married to " + spouse.name + "."
 end
 
 menu
