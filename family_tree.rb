@@ -16,6 +16,7 @@ def menu
     puts 'Press m to add who someone is married to.'
     puts 'Press s to see who someone is married to.'
     puts 'Press c add a child to a family.'
+    puts "Press p to see a child's parents."
     puts 'Press e to exit.'
     choice = gets.chomp
 
@@ -30,6 +31,12 @@ def menu
       see_marriage
     when 'c'
       add_child
+    when 'p'
+      list
+      puts "Enter the child to see their parents."
+      child_id = gets.chomp.to_i
+      child = Person.find(child_id)
+      see_parents(child)
     when 'e'
       exit
     end
@@ -98,6 +105,15 @@ def add_child
     full_child.update({:parent_id => parent_id})
     puts "#{full_child.name} is the child of #{full_child.parent_id}\n\n"
   end
+end
+
+def see_parents(child)
+  id = child.parent_id
+  parents = Parent.find(id)
+  spouse1 = Person.find(parents.person1_id)
+  spouse2 = Person.find(parents.person2_id)
+  puts "#{child.name} is the child of:"
+  puts "#{spouse1.name} and #{spouse2.name}\n\n"
 end
 
 system "clear"
