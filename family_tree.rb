@@ -17,6 +17,10 @@ def menu
     puts 'Press s to see who someone is married to.'
     puts 'Press c add a child to a family.'
     puts "Press p to see a child's parents."
+    puts "Press z to see a child's siblings."
+    puts "Press g to see a person's grandparents."
+    puts "Press y to see a person's aunts & uncles."
+    puts "Press w to see a person's cousins."
     puts 'Press e to exit.'
     choice = gets.chomp
 
@@ -32,11 +36,20 @@ def menu
     when 'c'
       add_child
     when 'p'
-      list
-      puts "Enter the child to see their parents."
-      child_id = gets.chomp.to_i
-      child = Person.find(child_id)
+      child = select_child
       see_parents(child)
+    when 'z'
+      child = select_child
+      see_siblings(child)
+    when 'g'
+      child = select_child
+      see_grandparents(child)
+    when 'y'
+      child = select_child
+      see_aunts_uncles(child)
+    when 'w'
+      child = select_child
+      see_cousins(child)
     when 'e'
       exit
     end
@@ -93,13 +106,11 @@ def add_child
   puts "Select the parents that are having a child: "
   parent_id = gets.chomp.to_i
   parent = Parent.find(parent_id)
-  list
-  puts "Select the number of your child:"
-  child_id = gets.chomp.to_i
-  full_child = Person.find(child_id)
+
+  full_child = select_child
   if full_child.parent_id
     puts "This child has already been assigned parents.\n\n"
-  elsif parent.person1_id == child_id || parent.person2_id == child_id
+  elsif parent.person1_id == full_child.id || parent.person2_id == full_child.id
     puts "You cannot enter a parent as their own child.\n\n"
   else
     full_child.update({:parent_id => parent_id})
@@ -109,11 +120,97 @@ end
 
 def see_parents(child)
   id = child.parent_id
-  parents = Parent.find(id)
-  spouse1 = Person.find(parents.person1_id)
-  spouse2 = Person.find(parents.person2_id)
-  puts "#{child.name} is the child of:"
-  puts "#{spouse1.name} and #{spouse2.name}\n\n"
+  if child.parent
+    spouse1 = Person.find(child.parent.person1_id)
+    spouse2 = Person.find(child.parent.person2_id)
+    puts "#{child.name} is the child of:"
+    puts "#{spouse1.name} and #{spouse2.name}\n\n"
+  else
+    puts "This person does not have parents on record yet.\n\n"
+  end
+end
+
+def select_child
+  list
+  puts "Select the number of a child:"
+  child_id = gets.chomp.to_i
+  child = Person.find(child_id)
+  child
+end
+
+def see_siblings(child)
+  if child.parent_id
+    id = child.parent_id
+    siblings = Person.where(parent_id: id)
+    puts "#{child.name}'s siblings are: "
+    siblings.each do |sibling|
+      if sibling.name != child.name
+        puts sibling.name
+      end
+    end
+  else
+    puts "#{child.name} is an only child."
+  end
+  puts "\n\n"
+end
+
+def see_grandparents(child)
+
+  if child.parent
+    parent1 = Person.find(child.parent.person1_id)
+    parent2 = Person.find(child.parent.person2_id)
+      see_parents(child)
+      see_parents(parent1)
+      see_parents(parent2)
+  else
+    puts "This person does not have parents on record yet."
+  end
+  puts "\n\n"
+end
+
+def see_aunts_uncles(child)
+  if child.parent
+    parent1 = Person.find(child.parent.person1_id)
+    parent2 = Person.find(child.parent.person2_id)
+    see_parents(child)
+    see_siblings(parent1)
+    see_siblings(parent2)
+  else
+    puts "#{child.name} has no aunts or uncles."
+  end
+end
+
+def see_cousins(child)
+  # if child.parent
+  #   parent1 = Person.find(child.parent.person1_id)
+  #   parent2 = Person.find(child.parent.person2_id)
+  #   see_parents(child)
+  #   see_siblings(parent1)
+  #   aunts = Person.where(parent_id: parent1.parent_id)
+  #   aunts.each do |aunt|
+  #     see_children(aunt)
+  #   end
+  #   see_siblings(parent2)
+  #   uncles = Person.where(parent_id: parent2.parent_id)
+  #   uncles.each do |uncle|
+  #     see_children(uncle)
+  #   end
+  # else
+  #   puts "#{child.name} has no aunts or uncles."
+  # end
+end
+
+def see_children(parent)
+  parents = Parent.find_by_person1_id(parent.id) || Parent.find_by_person2_id(parent.id)
+  if parents.id
+    children = Person.where(parent_id: parents.id)
+    puts "#{parent.name}'s children are: "
+    children.each do |child|
+      puts child.name
+    end
+  else
+    puts "This person has to children."
+  end
 end
 
 system "clear"
